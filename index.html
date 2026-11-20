@@ -148,10 +148,10 @@ function challenge(order,step){
  $('#title').textContent=title;$('#desc').textContent=step+' — '+(isObserve?'Remember the icon order, then repeat it.':isHold?'Hold the button until the moving level reaches the green zone.':'Tap when the moving needle enters the green zone.');
  const host=$('#choices');host.innerHTML='';
  if(isObserve){
-  const symbols=['●','◆','✦','●','✦'];const seq=Array.from({length:3},()=>symbols[Math.floor(Math.random()*symbols.length)]);
-  const cue=document.createElement('div');cue.style.cssText='font-size:34px;letter-spacing:15px;text-align:center;padding:16px;background:#ead9b8;border-radius:12px';cue.textContent=seq.join('');host.append(cue);
+  const symbols=['●','◆','✦'];const seq=Array.from({length:3},()=>symbols[Math.floor(Math.random()*symbols.length)]);
+  const cue=document.createElement('div');cue.style.cssText='font-size:38px;letter-spacing:15px;text-align:center;padding:16px;background:#ead9b8;border-radius:12px';cue.textContent=seq.join('');host.append(cue);
   const note=document.createElement('div');note.className='hint';note.textContent='Memorize the three symbols. They disappear in a moment.';host.append(note);
-  setTimeout(()=>{if(!challengeActive)return;cue.textContent='?  ?  ?';note.textContent='Now repeat the exact order.';const choices=document.createElement('div');choices.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:8px';let answer=[];seq.forEach((_,i)=>{const b=document.createElement('button');b.textContent='Choose '+(i+1);b.onclick=()=>{const v=prompt('Enter symbol: ●, ◆, or ✦');if(!v)return;answer[i]=v.trim();b.textContent=answer[i];if(answer.filter(Boolean).length===3){resolveChallenge(answer.join('')===seq.join(''),order)}};choices.append(b)});host.append(choices)},1250);
+  setTimeout(()=>{if(!challengeActive)return;cue.textContent='?  ?  ?';note.textContent='Repeat the exact sequence by tapping the symbols.';let answer=[];const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:8px';symbols.forEach(sym=>{const b=document.createElement('button');b.textContent=sym;b.style.fontSize='26px';b.onclick=()=>{if(answer.length>=3)return;answer.push(sym);note.textContent='Your sequence: '+answer.join('  ');if(answer.length===3)resolveChallenge(answer.join('')===seq.join(''),order)};row.append(b)});host.append(row)},1250);
   return;
  }
  const meter=document.createElement('div');meter.className='meter';const target=document.createElement('div');target.className='target';const needle=document.createElement('div');needle.className='needle';meter.append(target,needle);host.append(meter);
