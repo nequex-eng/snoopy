@@ -77,7 +77,8 @@ function drawHuman(x,y,type,t,walk=0){ctx.save();ctx.translate(x,y);const bob=Ma
  if(type==='charlie'){path([[-23,-83],[21,-83],[25,-29],[13,-24],[-20,-27]],'#f0bf45');path([[-23,-83],[-15,-72],[-7,-82],[0,-72],[8,-82],[16,-72],[21,-83]],'#f4d24e');}
  else if(type==='lucy'){path([[-22,-82],[20,-82],[25,-32],[0,-22],[-25,-32]],'#69aebe');path([[-27,-35],[27,-35],[33,-25],[0,-18],[-33,-25]],'#e3a6a0');}
  else if(type==='linus'){path([[-22,-82],[21,-82],[25,-29],[12,-24],[-22,-29]],'#c86e4e');lineTo([[-20,-63],[20,-63]],'#f1c7a1',3);}
- else if(type==='sally'){path([[-22,-82],[22,-82],[28,-27],[0,-22],[-28,-27]],'#e8a3a0');}\n else if(type==='franklin'){path([[-22,-82],[22,-82],[25,-28],[-24,-28]],'#8b83a7');}
+ else if(type==='sally'){path([[-22,-82],[22,-82],[28,-27],[0,-22],[-28,-27]],'#e8a3a0');}
+ else if(type==='franklin'){path([[-22,-82],[22,-82],[25,-28],[-24,-28]],'#8b83a7');}
  else {path([[-22,-82],[22,-82],[25,-28],[-24,-28]],'#8f82a8');}
  // arms
  lineTo([[-20,-75],[-30,-48],[-23,-40]],skin,9);lineTo([[20,-75],[29,-51],[24,-43]],skin,9);
@@ -88,7 +89,8 @@ function drawHuman(x,y,type,t,walk=0){ctx.save();ctx.translate(x,y);const bob=Ma
  else if(type==='lucy'){ellipse(-2,-129,27,16,dark);ellipse(18,-112,12,23,dark);path([[-25,-123],[-29,-141],[-9,-147],[15,-139],[25,-122],[9,-128]],dark);}
  else if(type==='linus'){path([[-25,-120],[-19,-139],[0,-145],[20,-135],[25,-117],[12,-126],[0,-120],[-12,-126]],'#e5d2a8');}
  else if(type==='sally'){ellipse(0,-132,25,12,'#e8d6a0');for(let i=0;i<7;i++)ellipse(-20+i*7,-138+(i%2)*-3,4,5,'#e8d6a0');}
- else if(type==='franklin'){ellipse(0,-132,26,14,'#302820');ellipse(-17,-126,8,12,'#302820');}\n else {ellipse(0,-132,27,13,dark);for(let i=0;i<5;i++)ellipse(-19+i*9,-137-(i%2)*3,5,5,dark);}
+ else if(type==='franklin'){ellipse(0,-132,26,14,'#302820');ellipse(-17,-126,8,12,'#302820');}
+ else {ellipse(0,-132,27,13,dark);for(let i=0;i<5;i++)ellipse(-19+i*9,-137-(i%2)*3,5,5,dark);}
  // face profile and expression
  ellipse(9,-110,2.4,2.8,dark,dark,1);ctx.beginPath();ctx.arc(14,-99,6,.1,1.2);ctx.strokeStyle=dark;ctx.lineWidth=2;ctx.stroke();
  if(type==='charlie'){lineTo([[-6,-83],[0,-72],[7,-82]],'#f4d8a0',3)}
