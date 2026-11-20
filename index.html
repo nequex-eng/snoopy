@@ -58,7 +58,7 @@ function drawCoffeeMachine(t){ctx.save();ctx.translate(18,0);
  // machine small highlights
  lineTo([[22,276],[22,525]],'rgba(255,255,255,.45)',4);ctx.restore();
 }
-function drawSnoopy(x,y,t){ctx.save();ctx.translate(x,y);
+function drawSnoopy(x,y,t){ctx.save();ctx.translate(x,y);ctx.scale(1.28,1.28);
  // Snoopy: classic Peanuts beagle silhouette — long white muzzle, oversized oval head,
  // one hanging black ear, tiny dot eye, black nose, red collar and compact body.
  ctx.lineCap='round';ctx.lineJoin='round';
@@ -147,6 +147,15 @@ function challenge(order,step){
  const title=isObserve?'观察配方提示':isHold?'控制奶泡火候':'手速挑战';
  $('#title').textContent=title;$('#desc').textContent=step+' — '+(isObserve?'Remember the icon order, then repeat it.':isHold?'Hold the button until the moving level reaches the green zone.':'Tap when the moving needle enters the green zone.');
  const host=$('#choices');host.innerHTML='';
+ if(lower.includes('grind')){
+  const goal=9;let taps=0,finished=false;const panel=document.createElement('div');panel.style.cssText='text-align:center;padding:12px;background:#ead9b8;border-radius:12px';
+  const count=document.createElement('div');count.style.cssText='font-size:34px;font-weight:900';count.textContent='0 / '+goal;
+  const bar=document.createElement('div');bar.style.cssText='height:13px;background:#d0bea0;border-radius:10px;overflow:hidden;margin:10px 0';
+  const fill=document.createElement('div');fill.style.cssText='height:100%;width:0;background:#78a56b;transition:width .08s';bar.append(fill);
+  const note=document.createElement('div');note.className='hint';note.textContent='2.8秒内连续点击9次！越快越好，别停！';
+  const tap=document.createElement('button');tap.className='challengeBtn';tap.textContent='快速点击！';tap.onpointerdown=e=>{e.preventDefault();if(finished)return;taps++;count.textContent=taps+' / '+goal;fill.style.width=Math.min(100,taps/goal*100)+'%';sfx('click');if(taps>=goal){finished=true;resolveChallenge(true,order)}};
+  panel.append(count,bar,note);host.append(panel,tap);challengeTimer=setTimeout(()=>{if(!finished){finished=true;resolveChallenge(false,order)}},2800);return;
+ }
  if(isObserve){
   const symbols=['●','◆','✦'];const seq=Array.from({length:3},()=>symbols[Math.floor(Math.random()*symbols.length)]);
   const cue=document.createElement('div');cue.style.cssText='font-size:38px;letter-spacing:15px;text-align:center;padding:16px;background:#ead9b8;border-radius:12px';cue.textContent=seq.join('');host.append(cue);
