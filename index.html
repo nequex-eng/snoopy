@@ -1,69 +1,127 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#f2dfbd"><title>Coffee Time — Snoopy Café</title>
+<meta name="theme-color" content="#f4e4c6"><title>Coffee Time — A Little Café</title>
 <style>
-*{box-sizing:border-box}html,body,#app{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:system-ui,-apple-system,sans-serif;background:#f2dfbd;color:#49392d}canvas{display:block;touch-action:none}
-#hud{position:fixed;inset:0;pointer-events:none;padding:clamp(10px,2vw,22px);display:flex;flex-direction:column;justify-content:space-between}
-.top,.bottom{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.brand,.stats,.info{background:#fff8e9e8;border:2px solid #76543c;border-radius:16px;padding:10px 14px;box-shadow:0 4px 0 #60452d30}
-.brand b{font-size:22px;letter-spacing:.04em}.brand small{display:block;opacity:.7}.stats{display:flex;gap:15px;font-weight:800}.bottom{align-items:end}.info{max-width:min(420px,60vw);font-size:13px}.info b{font-size:15px}.actions{display:flex;gap:8px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end}
-button{border:2px solid #654832;border-radius:13px;background:#fff4df;color:#443327;font-weight:800;padding:11px 14px;box-shadow:0 4px 0 #5b423255;cursor:pointer}button:active{transform:translateY(3px);box-shadow:0 1px 0 #5b423255}button.primary{background:#70b7bd}
-#dialog{display:none;position:fixed;inset:0;background:#2c211b88;place-items:center;padding:18px;pointer-events:auto}#dialog.open{display:grid}.sheet{width:min(420px,100%);background:#fff4dd;border:3px solid #654832;border-radius:22px;padding:20px;box-shadow:0 10px 0 #39281d55}.sheet h2{margin:0 0 6px}.sheet p{line-height:1.5}.choices{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}
-#toast{position:fixed;left:50%;top:18%;transform:translateX(-50%);background:#45362be8;color:#fff5e5;padding:10px 16px;border-radius:24px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;font-size:13px}
-@media(max-width:600px){.stats{gap:8px;padding:8px;font-size:12px}.brand{padding:8px 10px}.brand b{font-size:17px}.brand small{display:none}.info{max-width:50vw;padding:9px}.actions{max-width:48vw}.actions button{font-size:12px;padding:10px}.stats span:last-child{display:none}}
-</style></head><body><div id="app"></div>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f3e3c6;color:#49372b;font-family:Georgia,'Trebuchet MS',sans-serif}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:manipulation}
+#hud{position:fixed;inset:0;pointer-events:none;padding:clamp(9px,2vw,20px);display:flex;flex-direction:column;justify-content:space-between}.top,.bottom{display:flex;justify-content:space-between;align-items:flex-start;gap:9px}.brand,.stats,.info{background:#fff8e9e9;border:2px solid #72523c;border-radius:15px;padding:9px 13px;box-shadow:0 4px 0 #60452d25}.brand b{font-size:clamp(16px,2.4vw,23px);letter-spacing:.04em}.brand small{display:block;opacity:.68;font-size:11px}.stats{display:flex;gap:13px;font: bold 13px system-ui}.bottom{align-items:end}.info{max-width:min(440px,58vw);font:12px system-ui}.info b{font: bold 14px Georgia}.actions{display:flex;gap:7px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end}
+button{border:2px solid #654832;border-radius:12px;background:#fff4df;color:#443327;font-weight:800;padding:10px 13px;box-shadow:0 4px 0 #5b423244;cursor:pointer}button:active{transform:translateY(3px);box-shadow:0 1px 0 #5b423244}button:disabled{opacity:.45}
+#dialog{display:none;position:fixed;inset:0;background:#392b2080;place-items:center;padding:18px;pointer-events:auto}#dialog.open{display:grid}.sheet{width:min(420px,100%);background:#fff4dd;border:3px solid #654832;border-radius:21px;padding:19px;box-shadow:0 9px 0 #39281d55}.sheet h2{margin:0 0 5px}.sheet p{line-height:1.45;margin:6px 0}.choices{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}#toast{position:fixed;left:50%;top:17%;transform:translateX(-50%);background:#49372be9;color:#fff6e8;padding:9px 15px;border-radius:24px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;font:13px system-ui}
+@media(max-width:600px){.stats{gap:7px;padding:8px;font-size:11px}.brand{padding:8px 10px}.brand small{display:none}.info{max-width:52vw;padding:8px}.actions{max-width:46vw}.actions button{font-size:11px;padding:9px 10px}.stats span:nth-child(3){display:none}}
+</style></head><body><div id="game"><canvas id="scene"></canvas></div>
 <div id="hud"><div class="top"><div class="brand"><b>☕ COFFEE TIME</b><small>A little café, a lovely day</small></div><div class="stats"><span>🪙 <i id="coins">35</i></span><span>☕ <i id="served">0</i></span><span>🔥 <i id="combo">0</i></span><span>⭐ <i id="rating">5.0</i></span></div></div>
-<div class="bottom"><div class="info"><b id="objective">Welcome, barista!</b><div id="message">Tap the espresso machine to prepare your first coffee.</div><div id="order" style="margin-top:7px;font-weight:800">Next order: —</div><div style="height:7px;background:#e6d2b2;border-radius:8px;margin-top:6px;overflow:hidden"><div id="patience" style="height:100%;width:100%;background:#75a66b;transition:width .2s"></div></div></div><div class="actions"><button id="menu">☕ Make order</button><button id="upgrade">⬆ Upgrade</button><button id="camera">↻ View</button></div></div></div>
-<div id="toast"></div><div id="dialog"><div class="sheet"><h2 id="title">Coffee menu</h2><p id="desc">Choose a drink to prepare.</p><div class="choices" id="choices"></div><div style="text-align:right;margin-top:14px"><button id="close">Close</button></div></div></div>
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-const app=document.querySelector('#app'),scene=new THREE.Scene();scene.background=new THREE.Color('#f2dfbd');scene.fog=new THREE.Fog('#f2dfbd',22,42);
-const camera=new THREE.OrthographicCamera(-11,11,8,-8,.1,100);camera.position.set(13,15,17);camera.lookAt(0,1,0);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;app.appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xfff4dc,0x8b7158,2));const sun=new THREE.DirectionalLight(0xffedce,2.3);sun.position.set(-8,14,9);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
-const material=(c,r=.85)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
-const C={floor:material('#d5b88c'),tile:material('#e9d6b5'),wall:material('#f5e8d1'),blue:material('#65aeb8'),dark:material('#34484a'),metal:material('#b6b9b0',.35),wood:material('#916747'),lightwood:material('#bd8b5e'),cream:material('#fff0d5'),coffee:material('#59301e'),green:material('#78946b'),yellow:material('#e7bc58'),pink:material('#df9b91'),black:material('#34302f'),white:material('#fff8e9'),skin:material('#efc49c')};
-function block(parent,x,y,z,w,h,d,m){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y+h/2,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
-function cylinder(parent,x,y,z,r,h,m,rt=r){const o=new THREE.Mesh(new THREE.CylinderGeometry(r,rt,h,20),m);o.position.set(x,y+h/2,z);o.castShadow=true;parent.add(o);return o}
-block(scene,0,-.25,0,20,.5,16,C.floor);
-for(let x=-9;x<=9;x+=2)for(let z=-7;z<=7;z+=2)block(scene,x,.005,z,1.94,.025,1.94,C.tile);
-block(scene,0,0,-7.75,20,5.2,.35,C.wall);block(scene,-9.8,0,-1, .35,5.2,13,C.wall);
-block(scene,0,4.9,-7.55,20,.2,.5,C.wood);
-block(scene,-4,2.3,-7.53,4.7,2.7,.13,C.blue);block(scene,-4,2.3,-7.42,4.5,.1,.15,C.wood);block(scene,-4,2.3,-7.4,.1,2.6,.15,C.wood);
-block(scene,-5.2,0,-3.3,4.6,1.1,1.5,C.wood);block(scene,-5.2,1.1,-3.3,4.7,.16,1.6,C.cream);
-block(scene,-6.15,1.26,-3.8,1.45,2.15,.95,C.blue);block(scene,-6.15,3.42,-3.8,1.48,.14,.98,C.dark);block(scene,-6.15,2.62,-3.28,1.08,.65,.1,C.metal);cylinder(scene,-6.15,2.15,-3.2,.34,.22,C.dark);cylinder(scene,-6.15,2.35,-3.2,.27,.1,C.metal);block(scene,-5.55,2.53,-3.22,.8,.12,.16,C.black);cylinder(scene,-6.15,1.43,-3.12,.32,.12,C.cream);cylinder(scene,-6.15,1.55,-3.12,.26,.08,C.coffee);
-block(scene,-3.9,1.25,-3.25,.68,.95,.68,C.dark);cylinder(scene,-3.9,1.9,-3.25,.3,.36,C.metal);cylinder(scene,-3.9,2.12,-3.25,.28,.08,C.lightwood);
-block(scene,1.5,2.8,-7.5,3.6,2.6,.2,C.wood);block(scene,1.5,2.8,-7.37,3.35,2.35,.08,C.dark);for(let i=0;i<4;i++)block(scene,.65,3.55-i*.47,-7.31,1.65-i*.15,.035,.025,C.cream);
-function table(x,z){cylinder(scene,x,.8,z,.72,.14,C.lightwood);cylinder(scene,x,.1,z,.13,1.35,C.wood);for(const dx of [-.48,.48])for(const dz of [-.48,.48])block(scene,x+dx,.02,z+dz,.12,.78,.12,C.wood);for(const dx of [-1.05,1.05]){cylinder(scene,x+dx,.42,z,.3,.12,C.yellow);block(scene,x+dx,.47,z-.25,.56,.65,.1,C.wood)}}
-table(2.6,-1.5);table(5,-4.6);
-function plant(x,z){cylinder(scene,x,.12,z,.32,.28,C.lightwood);for(let i=0;i<6;i++){const leaf=cylinder(scene,x+Math.sin(i)*.2,.4,z+Math.cos(i)*.2,.1,.7,C.green,.05);leaf.rotation.z=(i-2.5)*.17}}
-plant(7,-6);plant(7,1);
-function character(x,z,shirt,skin,hair,kind){const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);const shirtM=material(shirt),skinM=material(skin),hairM=material(hair);const body=new THREE.Mesh(new THREE.CapsuleGeometry(.31,.58,5,10),shirtM);body.position.y=.82;body.castShadow=true;g.add(body);const head=new THREE.Mesh(new THREE.SphereGeometry(.38,18,16),skinM);head.position.y=1.57;head.scale.set(.95,1.08,.9);head.castShadow=true;g.add(head);const cap=new THREE.Mesh(new THREE.SphereGeometry(.39,18,12,0,Math.PI*2,0,Math.PI*.55),hairM);cap.position.set(0,1.68,-.03);g.add(cap);const arms=[];for(const s of [-1,1]){const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.1,.4,4,8),shirtM);arm.position.set(s*.38,.92,0);arm.rotation.z=s*.2;g.add(arm);arms.push(arm);const leg=block(g,s*.15,.02,.02,.14,.45,.18,C.black);const eye=new THREE.Mesh(new THREE.SphereGeometry(.03,8,8),C.black);eye.position.set(s*.13,1.62,.33);g.add(eye)}g.userData={arms,kind,target:new THREE.Vector3(x,0,z),home:new THREE.Vector3(x,0,z)};return g}
-const snoopy=character(-3.15,0,'#fff8e9','#fff8e9','#303235','Snoopy');snoopy.scale.set(1.04,.82,.9);
-const woodstock=character(-1.5,0,'#e9bd56','#e9bd56','#e9bd56','Woodstock');woodstock.scale.set(.52,.62,.52);
-const customers=[character(0,1,'#e8bd57','#f1cba6','#6a4c3d','Charlie'),character(2,1,'#72aeba','#e9bc99','#3b302d','Lucy'),character(4,1,'#d98f7e','#efc7a9','#e5c36d','Friend'),character(6,1,'#9b8eb7','#bd8866','#302c2a','Friend')];
-customers.forEach((p,i)=>p.userData.target.set(-2.2+i*.9,0,1));
-let coins=35,served=0,level=1,combo=0,queue=[],active=null,clock=0,spawnClock=0,gameTime=0,gameOver=false;
-const recipes=[
- {name:'Espresso',price:6,steps:['Grind beans','Pull espresso']},
- {name:'Latte',price:9,steps:['Grind beans','Pull espresso','Steam milk','Pour latte']},
- {name:'Cappuccino',price:10,steps:['Grind beans','Pull espresso','Steam milk','Add foam']},
- {name:'Mocha',price:11,steps:['Grind beans','Pull espresso','Add chocolate','Steam milk']}
-];
-const $=s=>document.querySelector(s);
-function update(){ $('#coins').textContent=coins;$('#served').textContent=served;$('#combo').textContent=combo;$('#rating').textContent=(Math.min(5,4.5+served*.025)).toFixed(1);$('#objective').textContent='Day '+(Math.floor(gameTime/90)+1)+' · '+served+' coffees served';$('#order').textContent=active?'ORDER: '+active.recipe.name+'  ·  '+active.recipe.price+' coins'+(active.step?'  ·  Step '+(active.step+1)+'/'+active.recipe.steps.length:''):'Waiting for customers…';const p=active?Math.max(0,active.patience/active.maxPatience*100):100;$('#patience').style.width=p+'%';$('#patience').style.background=p<30?'#d66b55':p<60?'#dfad50':'#75a66b';}
-let toastTimer;function toast(t){$('#message').textContent=t;const el=$('#toast');el.textContent=t;el.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.opacity=0,2200)}
+<div class="bottom"><div class="info"><b id="objective">Welcome, barista!</b><div id="message">Tap the espresso machine to prepare your first coffee.</div><div id="order" style="margin-top:6px;font-weight:800">Next order: —</div><div style="height:7px;background:#e6d2b2;border-radius:8px;margin-top:5px;overflow:hidden"><div id="patience" style="height:100%;width:100%;background:#75a66b;transition:width .2s"></div></div></div><div class="actions"><button id="menu">☕ Make order</button><button id="upgrade">⬆ Upgrade</button><button id="restart">↻ New day</button></div></div></div>
+<div id="toast"></div><div id="dialog"><div class="sheet"><h2 id="title">Coffee menu</h2><p id="desc">Choose a drink to prepare.</p><div class="choices" id="choices"></div><div style="text-align:right;margin-top:13px"><button id="close">Close</button></div></div></div>
+<script>
+const canvas=document.querySelector('#scene'),ctx=canvas.getContext('2d');let W=1200,H=680,dpr=1,scale=1,ox=0,oy=0;
+function resize(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;const s=Math.min(W/1200,H/680);scale=s;ox=(W-1200*s)/2;oy=(H-680*s)/2;ctx.setTransform(dpr*s,0,0,dpr*s,dpr*ox,dpr*oy)}addEventListener('resize',resize);resize();
+const ink='#302820',paper='#f4e4c6',line=5;
+function path(points,fill,stroke=ink,lw=4){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke()}
+function rr(x,y,w,h,r,fill,stroke=ink,lw=4){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke()}
+function ellipse(x,y,rx,ry,fill,stroke=ink,lw=4){ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke()}
+function lineTo(points,color=ink,lw=4){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke()}
+function text(t,x,y,size=18,color=ink,font='Georgia'){ctx.fillStyle=color;ctx.font=size+'px '+font;ctx.fillText(t,x,y)}
+function drawBackground(t){const g=ctx.createLinearGradient(0,0,0,680);g.addColorStop(0,'#f8ebd2');g.addColorStop(1,'#ead5b0');ctx.fillStyle=g;ctx.fillRect(0,0,1200,680);
+ // subtle paper grain dots
+ for(let i=0;i<95;i++){const x=(i*137)%1200,y=(i*83)%650;ctx.fillStyle='rgba(120,86,52,.045)';ctx.fillRect(x,y,2,2)}
+ // back wall and floor horizon
+ ctx.fillStyle='#f2dfbf';ctx.fillRect(0,0,1200,550);ctx.fillStyle='#d9bd91';ctx.fillRect(0,550,1200,130);lineTo([[0,550],[1200,550]],'#b99b72',3);
+ // warm window light
+ ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(390,55,730,420);
+ // wall shelf
+ lineTo([[18,245],[335,245],[335,255],[18,255]],'#70513a',5);lineTo([[22,247],[330,247]],'#f8e8c9',2);
+}
+function drawCoffeeMachine(t){ctx.save();ctx.translate(18,0);
+ // shadow
+ ellipse(160,572,166,13,'rgba(72,49,29,.18)','rgba(72,49,29,0)',0);
+ // base and body
+ rr(4,548,322,70,17,'#64aeb8');rr(13,252,308,305,17,'#69b5bf');rr(26,265,281,274,13,'#78c0c5','#315b5b',3);
+ // side edge and base vents
+ rr(55,580,78,10,4,'#4b9299','#315b5b',2);rr(55,597,78,8,4,'#4b9299','#315b5b',2);
+ // top rail and bean hopper
+ lineTo([[27,230],[310,230]],'#493b2e',5);lineTo([[27,230],[27,247],[310,247],[310,230]],'#493b2e',3);
+ rr(42,160,92,70,15,'#fff0d5');ellipse(88,162,46,11,'#fff3d9');ellipse(88,169,38,8,'#9b744c','#4b3627',2);for(let i=0;i<23;i++){ellipse(58+(i*19)%58,177+(i*13)%39,4,2.8,'#8c633e','#64452e',1)}
+ rr(151,194,55,35,6,'#f9ecd4');rr(211,179,49,50,7,'#fff0d5');rr(267,180,50,50,7,'#f5e4c7');rr(278,183,18,40,5,'#e4cba2','#594431',2);
+ // buttons and gauge
+ ellipse(83,310,11,11,'#e77e4e');ellipse(115,310,10,10,'#e9c45c');ellipse(145,310,10,10,'#e9c45c');
+ ellipse(230,311,26,26,'#f8efda','#3c332c',4);ellipse(230,311,19,19,'#fff9e8','#7d6953',2);lineTo([[230,311],[240,298]],'#302820',3);lineTo([[230,311],[224,317]],'#302820',2);
+ // right knob
+ ellipse(342,308,15,30,'#9a9c90');ellipse(344,308,8,22,'#c4c4b5');
+ // group head and portafilter
+ rr(184,365,101,56,10,'#454746');rr(194,375,80,38,7,'#b9b8aa');rr(205,383,56,21,5,'#eee4d1','#554638',2);
+ lineTo([[205,399],[184,427],[184,492]],'#35312c',7);ellipse(184,492,6,7,'#292725');
+ rr(260,397,100,15,7,'#292523');ellipse(358,404,9,7,'#171615');rr(320,394,44,20,8,'#211e1c');
+ // cup and espresso
+ rr(204,489,70,51,12,'#fff0d7','#4e4032',4);ellipse(239,489,35,8,'#fff7e6');ellipse(239,490,27,4,'#68402a','#68402a',1);ctx.beginPath();ctx.arc(274,512,16,-Math.PI/2,Math.PI/2);ctx.strokeStyle='#fff0d7';ctx.lineWidth=8;ctx.stroke();ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.stroke();
+ // cup steam
+ for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(222+i*16,476);ctx.bezierCurveTo(210+i*16,465,235+i*16,458,222+i*16,446);ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=3;ctx.stroke()}
+ // machine small highlights
+ lineTo([[22,276],[22,525]],'rgba(255,255,255,.45)',4);ctx.restore();
+}
+function drawSnoopy(x,y,t){ctx.save();ctx.translate(x,y); // white dog side-on silhouette
+ // tail and body
+ lineTo([[-28,-25],[-43,-41],[-48,-36]],'#fffdf5',5);ellipse(0,-29,32,21,'#fffdf5');ellipse(25,-46,26,24,'#fffdf5');ellipse(46,-43,11,17,'#262629');ellipse(8,-67,4,4,ink,ink,1);
+ // muzzle
+ ellipse(47,-36,17,10,'#fffdf5');ellipse(61,-39,4,4,ink,ink,1);
+ // ear
+ ellipse(29,-27,12,22,'#262629');ellipse(0,-4,9,24,'#fffdf5');ellipse(25,-3,9,24,'#fffdf5');ellipse(-4,18,14,5,'#fffdf5');ellipse(29,18,14,5,'#fffdf5');
+ // collar
+ lineTo([[-12,-15],[6,-12],[10,-7]],'#c65b4c',3);
+ ctx.restore()}
+function drawWoodstock(x,y,t){ctx.save();ctx.translate(x,y);path([[-13,-8],[-4,-25],[0,-14],[8,-28],[10,-10],[20,-16],[14,-1],[20,4],[5,3],[-2,13],[-7,2],[-18,5]],'#edc34d');ellipse(6,-12,2.3,2.3,ink,ink,1);lineTo([[0,4],[-4,17],[2,17],[5,5]],ink,2);lineTo([[8,4],[12,16],[17,16]],ink,2);ctx.restore()}
+function drawHuman(x,y,type,t,walk=0){ctx.save();ctx.translate(x,y);const bob=Math.sin(t*5+walk)*1.5;ctx.translate(0,bob);
+ const skin='#f1c7a1',dark='#282522';
+ // legs, shoes
+ const step=Math.sin(t*8+walk)*2.5;lineTo([[-9,-28],[-11,-5+step],[-17,0]],dark,5);lineTo([[9,-28],[12,-5-step],[17,0]],dark,5);ellipse(-18,0,11,4,'#40342c');ellipse(18,0,11,4,'#40342c');
+ // clothes
+ if(type==='charlie'){path([[-23,-83],[21,-83],[25,-29],[13,-24],[-20,-27]],'#f0bf45');path([[-23,-83],[-8,-73],[0,-82],[9,-72],[21,-83]],'#e8b43e');}
+ else if(type==='lucy'){path([[-22,-82],[20,-82],[25,-32],[0,-22],[-25,-32]],'#69aebe');path([[-27,-35],[27,-35],[33,-25],[0,-18],[-33,-25]],'#e3a6a0');}
+ else if(type==='linus'){path([[-22,-82],[21,-82],[25,-29],[12,-24],[-22,-29]],'#c86e4e');lineTo([[-20,-63],[20,-63]],'#f1c7a1',3);}
+ else if(type==='sally'){path([[-22,-82],[22,-82],[28,-27],[0,-22],[-28,-27]],'#e8a3a0');}
+ else {path([[-22,-82],[22,-82],[25,-28],[-24,-28]],'#8f82a8');}
+ // arms
+ lineTo([[-20,-75],[-30,-48],[-23,-40]],skin,9);lineTo([[20,-75],[29,-51],[24,-43]],skin,9);
+ // head
+ ellipse(0,-108,25,28,skin);ellipse(-25,-108,5,8,skin);ellipse(25,-108,5,8,skin);
+ // hair styles
+ if(type==='charlie'){path([[-24,-115],[-21,-136],[-8,-140],[0,-135],[11,-139],[24,-126],[23,-114],[14,-120],[4,-116],[-4,-122],[-15,-116]],'#4a3028');}
+ else if(type==='lucy'){ellipse(-2,-129,27,16,dark);ellipse(18,-112,12,23,dark);path([[-25,-123],[-29,-141],[-9,-147],[15,-139],[25,-122],[9,-128]],dark);}
+ else if(type==='linus'){path([[-25,-120],[-19,-139],[0,-145],[20,-135],[25,-117],[12,-126],[0,-120],[-12,-126]],'#e5d2a8');}
+ else if(type==='sally'){ellipse(0,-132,25,12,'#e8d6a0');for(let i=0;i<7;i++)ellipse(-20+i*7,-138+(i%2)*-3,4,5,'#e8d6a0');}
+ else {ellipse(0,-132,27,13,dark);for(let i=0;i<5;i++)ellipse(-19+i*9,-137-(i%2)*3,5,5,dark);}
+ // face profile and expression
+ ellipse(9,-110,2.4,2.8,dark,dark,1);ctx.beginPath();ctx.arc(14,-99,6,.1,1.2);ctx.strokeStyle=dark;ctx.lineWidth=2;ctx.stroke();
+ if(type==='charlie'){lineTo([[-6,-83],[0,-72],[7,-82]],'#f4d8a0',3)}
+ ctx.restore()}
+function drawQueue(t){const positions=[565,700,835,970];const types=['charlie','lucy','linus','sally'];for(let i=0;i<4;i++){const p=customers[i];if(!p.userData.busy)continue;const target=positions[i];p.x+=(target-p.x)*.035;drawHuman(p.x,558,types[i],t,i);if(p===active){ellipse(p.x,420,42,12,'rgba(90,58,35,.10)','rgba(0,0,0,0)',0);rr(p.x-39,388,78,27,9,'#fff9e9','#7b5c43',2);text(active.recipe.name,p.x-30,407,13);}}}
+function drawTables(t){function table(x,y){ellipse(x,y+40,58,12,'rgba(80,53,31,.12)','rgba(0,0,0,0)',0);rr(x-48,y-5,96,12,5,'#b98252');lineTo([[x,y+5],[x,y+75]],'#7a5134',9);lineTo([[x-35,y+76],[x+35,y+76]],'#7a5134',6);rr(x-91,y+17,30,39,8,'#e6b958');rr(x+60,y+17,30,39,8,'#e6b958');}table(770,510);table(1050,490)}
+function drawAll(t){ctx.clearRect(0,0,1200,680);drawBackground(t); // chalk menu board
+ rr(770,72,310,155,8,'#78553b');rr(781,82,288,135,4,'#343a36','#493a2d',2);text('TODAY’S COFFEE',812,111,20,'#fff0d4');['ESPRESSO  ·  LATTE','CAPPUCCINO  ·  MOCHA','MADE WITH LOVE'].forEach((s,i)=>text(s,810,147+i*25,15,'#f4e8d1'));
+ // shelf jars
+ lineTo([[30,231],[330,231]],'#624a35',5);rr(45,173,55,54,8,'#fff0d7');ellipse(72,173,27,7,'#fff0d7');rr(115,188,50,39,6,'#fff0d7');rr(176,164,53,63,7,'#f1dfbd');rr(235,180,65,47,7,'#f8e8ca');
+ drawCoffeeMachine(t);
+ // cup stack / plant
+ for(let i=0;i<3;i++){rr(350+i*23,500-i*3,25,25,5,'#fff2d8','#6b5140',2);ellipse(362+i*23,500-i*3,12,3,'#fff8e9','#6b5140',1)}
+ // potted plant
+ ellipse(1115,531,24,8,'#986b45');rr(1094,505,42,29,5,'#b87f53');for(let i=0;i<7;i++){const x=1115+Math.sin(i*2.3)*25,y=480-Math.cos(i*2.3)*20;lineTo([[1115,509],[x,y]],'#66875b',4);ellipse(x,y,8,14,'#86a16c')}
+ drawTables(t);drawSnoopy(410,558,t);drawWoodstock(485,556,t);drawQueue(t);
+ // subtle floor line and chalky texture overlay
+ lineTo([[0,620],[1200,620]],'rgba(112,80,48,.25)',2);
+}
+const types=['charlie','lucy','linus','sally'];let customers=types.map((type,i)=>({type,x:565+i*135,userData:{busy:false}}));
+let coins=35,served=0,level=1,combo=0,queue=[],active=null,spawnClock=0,gameTime=0,clock=0,activeReward=0,toastTimer;
+const recipes=[{name:'Espresso',price:6,steps:['Grind beans','Pull espresso']},{name:'Latte',price:9,steps:['Grind beans','Pull espresso','Steam milk','Pour latte']},{name:'Cappuccino',price:10,steps:['Grind beans','Pull espresso','Steam milk','Add foam']},{name:'Mocha',price:11,steps:['Grind beans','Pull espresso','Add chocolate','Steam milk']}];
+const $=s=>document.querySelector(s);function update(){ $('#coins').textContent=coins;$('#served').textContent=served;$('#combo').textContent=combo;$('#rating').textContent=Math.min(5,4.5+served*.025).toFixed(1);$('#objective').textContent='Day '+(Math.floor(gameTime/90)+1)+' · '+served+' coffees served';$('#order').textContent=active?'ORDER: '+active.recipe.name+' · '+active.recipe.price+' coins · Step '+(active.step+1)+'/'+active.recipe.steps.length:'Waiting for customers…';const p=active?Math.max(0,active.patience/active.maxPatience*100):100;$('#patience').style.width=p+'%';$('#patience').style.background=p<30?'#d66b55':p<60?'#dfad50':'#75a66b'}
+function toast(t){$('#message').textContent=t;const el=$('#toast');el.textContent=t;el.style.opacity=1;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.opacity=0,2300)}
 function show(title,desc,items){$('#title').textContent=title;$('#desc').textContent=desc;const c=$('#choices');c.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.textContent=it.label;b.disabled=!!it.disabled;b.onclick=()=>{$('#dialog').classList.remove('open');it.run()};c.append(b)});$('#dialog').classList.add('open')}
-function moveToQueue(){queue.forEach((o,i)=>o.person.userData.target.set(-2.25+i*.92,0,1.15));if(active)active.person.userData.target.set(-3.1,0,1.15);update()}
-function newCustomer(){if(queue.length+(active?1:0)>=4)return;const free=customers.find(p=>!p.userData.busy);if(!free)return;const recipe=recipes[Math.floor(Math.random()*recipes.length)];const patience=level>=3?62:50;free.userData.busy=true;free.userData.target.set(7,0,2.5);queue.push({person:free,recipe,patience,maxPatience:patience,step:0});moveToQueue();if(!active)nextCustomer();toast('A new customer joined the queue.')}
-function nextCustomer(){if(active||!queue.length)return;active=queue.shift();active.step=0;active.patience=active.maxPatience;moveToQueue();toast('New order: '+active.recipe.name+'. Make it before they lose patience!')}
-function leaveCustomer(success){if(!active)return;const p=active.person;active=null;p.userData.busy=false;p.userData.target.set(8,0,3);setTimeout(()=>{if(!p.userData.busy){p.position.set(8,0,3);p.userData.target.set(8,0,3)}},1500);moveToQueue();if(success){served++;combo++;const tip=Math.floor(combo/3)*2;const earned=activeReward+tip;coins+=earned;toast('Perfect! +'+earned+' coins'+(tip?' (combo tip +'+tip+')':''));}else{combo=0;toast('Customer left. The queue is waiting.')}setTimeout(nextCustomer,500)}
-let activeReward=0;
-function openBrew(){if(gameOver)return;if(!active){nextCustomer();if(!active){toast('No customers yet. New customers arrive shortly.');return}}const order=active;const stepName=order.recipe.steps[order.step];show(order.recipe.name+' order','Step '+(order.step+1)+' of '+order.recipe.steps.length+': '+stepName,[{label:'✓ '+stepName,run:()=>{if(active!==order)return;order.step++;if(order.step>=order.recipe.steps.length){activeReward=order.recipe.price+(level-1)*2;leaveCustomer(true)}else{toast('Good! Next: '+order.recipe.steps[order.step]);update();openBrew()}}},{label:'✕ Wrong action',run:()=>{if(active!==order)return;order.patience-=12;combo=0;toast('That is not the right step. Check the recipe!');update();openBrew()}}])}
-function upgradeMenu(){show('Café upgrades','Machine level '+level+'. Upgrades improve earnings and customer patience.',[{label:'Upgrade · '+(25*level)+' coins',disabled:coins<25*level,run:()=>{const cost=25*level;if(coins>=cost){coins-=cost;level++;if(active){active.maxPatience+=8;active.patience+=8}update();toast('Machine upgraded! Better tips and more patient customers.')}else toast('Not enough coins yet.')}},{label:'Keep serving',run:()=>{}}])}
-$('#menu').onclick=openBrew;$('#upgrade').onclick=upgradeMenu;$('#close').onclick=()=>$('#dialog').classList.remove('open');
-let view=0;$('#camera').onclick=()=>{view++;camera.position.set(view%2?16:13,view%2?13:15,view%2?14:17);camera.lookAt(0,1,0)};
-const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();let meshes=[];scene.traverse(o=>{if(o.isMesh)meshes.push(o)});renderer.domElement.addEventListener('pointerdown',e=>{pointer.x=e.clientX/innerWidth*2-1;pointer.y=-(e.clientY/innerHeight)*2+1;ray.setFromCamera(pointer,camera);const h=ray.intersectObjects(meshes);if(!h.length)return;const p=h[0].point;if(p.x< -4.35&&p.z< -2){coffeeMenu();return}const near=[snoopy,woodstock,...customers].find(c=>Math.hypot(c.position.x-p.x,c.position.z-p.z)<.85);if(near){if(near.userData.kind==='Snoopy')toast('Snoopy gives you a happy little nod.');else if(near.userData.busy)openBrew();else toast(near.userData.kind+' is enjoying the café.')}else toast('A lovely little corner of the café.')});
-function resize(){const a=innerWidth/innerHeight,v=8.6;camera.left=-v*a/2;camera.right=v*a/2;camera.top=v/2;camera.bottom=-v/2;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}addEventListener('resize',resize);resize();
-let t=0;function animate(){requestAnimationFrame(animate);const dt=Math.min(.05,clock?((performance.now()-clock)/1000):.016);clock=performance.now();t+=dt;gameTime+=dt;spawnClock+=dt;if(spawnClock>11){spawnClock=0;newCustomer()}if(active){active.patience-=dt;if(active.patience<=0)leaveCustomer(false);update()}[snoopy,woodstock,...customers].forEach((p,i)=>{const u=p.userData,dx=u.target.x-p.position.x,dz=u.target.z-p.position.z;if(Math.hypot(dx,dz)>.08){p.position.x+=dx*Math.min(1,dt*.95);p.position.z+=dz*Math.min(1,dt*.95);p.rotation.y=Math.atan2(dx,dz);u.arms.forEach((a,j)=>a.rotation.x=Math.sin(t*9+i+j)*.28)}else u.arms.forEach((a,j)=>a.rotation.x=Math.sin(t*2+i+j)*.05);p.position.y=Math.abs(Math.sin(t*3+i))*.018});renderer.render(scene,camera)}customers.forEach(p=>{p.userData.busy=false;p.position.set(8,0,3);p.userData.target.set(8,0,3)});newCustomer();setTimeout(newCustomer,3500);animate();update();toast('First customer incoming! Follow the order steps and beat the patience timer.');
+function layoutQueue(){queue.forEach((o,i)=>{o.person.x=565+i*135});if(active)active.person.x=565}
+function newCustomer(){if(queue.length+(active?1:0)>=4)return;const p=customers.find(x=>!x.userData.busy);if(!p)return;const patience=level>=3?64:52;p.userData.busy=true;p.x=1180;queue.push({person:p,recipe:recipes[Math.floor(Math.random()*recipes.length)],patience,maxPatience:patience,step:0});layoutQueue();if(!active)nextCustomer();toast('A new customer joined the queue.')}
+function nextCustomer(){if(active||!queue.length)return;active=queue.shift();active.patience=active.maxPatience;layoutQueue();update();toast('New order: '+active.recipe.name+'. Make it before they lose patience!')}
+function finish(success){if(!active)return;const p=active.person;active=null;p.userData.busy=false;p.x=1180;if(success){served++;combo++;const tip=Math.floor(combo/3)*2;coins+=activeReward+tip;toast('Perfect! +'+(activeReward+tip)+' coins'+(tip?' · combo tip +'+tip:''))}else{combo=0;toast('Customer left. The queue is waiting.')}layoutQueue();update();setTimeout(nextCustomer,450)}
+function makeOrder(){if(!active){nextCustomer();if(!active){toast('No customer yet. A new customer will arrive soon.');return}}const order=active;const step=order.recipe.steps[order.step];show(order.recipe.name+' order','Step '+(order.step+1)+' of '+order.recipe.steps.length+': '+step,[{label:'✓ '+step,run:()=>{if(active!==order)return;order.step++;if(order.step===order.recipe.steps.length){activeReward=order.recipe.price+(level-1)*2;finish(true)}else{toast('Nice! Next: '+order.recipe.steps[order.step]);update();makeOrder()}}},{label:'✕ Wrong action',run:()=>{if(active!==order)return;order.patience-=12;combo=0;toast('Wrong step! Check the recipe and hurry.');update();makeOrder()}}])}
+function upgrade(){show('Café upgrades','Machine level '+level+'. Each upgrade increases drink earnings and customer patience.',[{label:'Upgrade · '+25*level+' coins',disabled:coins<25*level,run:()=>{const cost=25*level;if(coins>=cost){coins-=cost;level++;if(active){active.patience+=8;active.maxPatience+=8}update();toast('Machine upgraded to level '+level+'!')}else toast('Not enough coins yet.')}},{label:'Keep serving',run:()=>{}}])}
+$('#menu').onclick=makeOrder;$('#upgrade').onclick=upgrade;$('#close').onclick=()=>$('#dialog').classList.remove('open');$('#restart').onclick=()=>{coins=35;served=0;level=1;combo=0;queue=[];active=null;customers.forEach(p=>{p.userData.busy=false;p.x=1180});gameTime=0;spawnClock=0;newCustomer();update();toast('A fresh café day begins!')};
+canvas.addEventListener('pointerdown',e=>{const x=(e.clientX-ox)/scale,y=(e.clientY-oy)/scale;if(x<380&&y>245&&y<625){makeOrder();return}if(x>370&&x<465&&y>475){toast('Snoopy is waiting for a little treat.');return}if(x>480&&x<525&&y>490){toast('Woodstock chirps happily!');return}if(active&&x>active.person.x-45&&x<active.person.x+45&&y>420&&y<580){makeOrder();return}if(x>0&&x<1200&&y>250){toast('Tap the blue espresso machine to prepare the current order.')}});
+function frame(now){const dt=Math.min(.05,clock?(now-clock)/1000:.016);clock=now;gameTime+=dt;spawnClock+=dt;if(spawnClock>10.5){spawnClock=0;newCustomer()}if(active){active.patience-=dt;if(active.patience<=0)finish(false);update()}drawAll(now/1000);requestAnimationFrame(frame)}
+newCustomer();setTimeout(newCustomer,3500);update();toast('Welcome! Tap the blue espresso machine to serve your first customer.');requestAnimationFrame(frame);
 </script></body></html>
